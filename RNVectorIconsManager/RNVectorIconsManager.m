@@ -63,14 +63,25 @@ RCT_EXPORT_MODULE();
                                                   withColor:(UIColor *)color
 {
   if(![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-    // No cached icon exists, we need to create it and persist to disk
-
     NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:glyph attributes:@{NSFontAttributeName: font, NSForegroundColorAttributeName: color}];
 
-    CGSize iconSize = [attributedString size];
-    UIGraphicsBeginImageContextWithOptions(iconSize, NO, 0.0);
-    [attributedString drawAtPoint:CGPointMake(0, 0)];
+    CGFloat size = [attributedString size].width;
+    CGSize box = CGSizeMake(size, size);
+    CGRect textBounds = [attributedString boundingRectWithSize:box options:NSStringDrawingUsesDeviceMetrics context:nil];
     
+    CGFloat resize = floorf(size*size*.985/(textBounds.size.width>=textBounds.size.height?textBounds.size.width:textBounds.size.height));
+
+    font = [UIFont fontWithName:font.fontName size:resize];
+    attributedString = [[NSAttributedString alloc] initWithString:glyph attributes:@{NSFontAttributeName: font, NSForegroundColorAttributeName: color}];
+
+    CGRect textBoundsX, textBoundsY;
+    textBoundsX = [attributedString boundingRectWithSize:box options:NSStringDrawingUsesDeviceMetrics context:nil];
+    textBoundsY = [attributedString boundingRectWithSize:box options:NSStringDrawingUsesLineFragmentOrigin context:nil];
+    textBounds = CGRectMake(textBoundsX.origin.x, 0, textBoundsX.size.width, textBoundsY.size.height);
+
+    UIGraphicsBeginImageContextWithOptions(box, NO, 0.0);
+    [attributedString drawAtPoint:CGPointMake(-floor(textBounds.origin.x)+floor(size-textBounds.size.width)/2,
+                                              floor(size-textBounds.size.height)/2)];
     UIImage *iconImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
   
