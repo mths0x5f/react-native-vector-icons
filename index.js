@@ -5,3 +5,4 @@ export {
 export {
   default as createIconSetFromIcoMoon,
 } from './lib/create-icon-set-from-icomoon';
+export { icons, loadIcons } from './lib/load-icons';
